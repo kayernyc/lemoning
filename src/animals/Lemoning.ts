@@ -4,8 +4,7 @@ export interface LemoningProps {
     x: number;
     y: number;
   },
-  boundaries: boundaryCoordinates,
-  update: () => void
+  update: () => void,
 }
 
 type positionCoordinates = {
@@ -23,7 +22,7 @@ type movementVector = {
   y: number
 }
 
-const randomMovement = () => (Math.random() * 5) + 2;
+const randomMovement = () => (Math.random() * 5) + 15;
 const randomValence = () => Math.random() - .5;
 
 const evaluateAgainstBoundary = (
@@ -42,6 +41,11 @@ const evaluateAgainstBoundary = (
   const boundary = deltaName === 'x' ? boundaries.right : boundaries.bottom;
   let newPosition = startPosition + delta;
 
+  if (startPosition > boundary) {
+    //window has resized, may be outside the new draw area
+    return -Math.abs(delta)
+  }
+
   if (newPosition > 0 && newPosition < boundary) {
     return delta;
   } else {
@@ -51,15 +55,19 @@ const evaluateAgainstBoundary = (
 }
 
 export class Lemoning {
-  boundaries: boundaryCoordinates;
+  static boundaries: boundaryCoordinates = {
+    right: 0,
+    bottom: 0
+  };
+  static frameRateRatio = 1;
   ctx: CanvasRenderingContext2D;
   position: positionCoordinates;
   private movement: movementVector;
 
-  constructor(ctx: CanvasRenderingContext2D, position: positionCoordinates, boundaries: boundaryCoordinates) {
+  constructor(ctx: CanvasRenderingContext2D, position: positionCoordinates) {
     this.ctx = ctx;
     this.position = position;
-    this.boundaries = boundaries;
+
 
     this.movement = {
       x: randomMovement() * randomValence(),
@@ -80,7 +88,7 @@ export class Lemoning {
   update() {
     const coreParameterObject = {
       position: this.position,
-      boundaries: this.boundaries,
+      boundaries: Lemoning.boundaries,
       movement: this.movement
     }
 
@@ -95,8 +103,8 @@ export class Lemoning {
     this.movement.x = deltaX;
     this.movement.y = deltaY;
 
-    this.position.x += this.movement.x;
-    this.position.y += this.movement.y;
+    this.position.x += this.movement.x * Lemoning.frameRateRatio;
+    this.position.y += this.movement.y * Lemoning.frameRateRatio;
     this.draw()
   }
 }

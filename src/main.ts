@@ -1,19 +1,55 @@
 import { Lemoning } from './animals/Lemoning';
-import './style.css'
+import './style.css';
+import { debounce } from './utils/debounce';
+
+// TODO: add linting
+
 const lemonings: Lemoning[] = [];
+let newHeight: undefined | number;
+let newWidth: undefined | number;
+
+let lastTime = Date.now();
+
+const setCanvasSize = (canvas: HTMLCanvasElement, height: number, width: number) => {
+  canvas.setAttribute('height', `${height} px`);
+  canvas.setAttribute('width', `${width} px`);
+}
+
+const resizeHandler = debounce(() => {
+  newHeight = window.innerHeight;
+  newWidth = window.innerWidth;
+});
 
 const initField = (app: HTMLElement, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
-  canvas.setAttribute('height', '600px')
-  canvas.setAttribute('width', '600px')
-  // ctx.fillRect(0, 0, canvas.width, canvas.height);
-  app.append(canvas)
+  window.addEventListener('resize', resizeHandler);
 
-  lemonings.push(new Lemoning(ctx, { x: 400, y: 300 }, { right: 600, bottom: 600 }));
+  setCanvasSize(canvas, window.innerHeight, window.innerWidth);
+  Lemoning.boundaries.right = window.innerWidth;
+  Lemoning.boundaries.bottom = window.innerHeight;
+
+  app.append(canvas);
+  lemonings.push(new Lemoning(ctx, { x: 400, y: 300 }));
+
   tick();
 }
 
 const tick = () => {
-  ctx?.clearRect(0, 0, 600, 600);
+  const currentTime = Date.now();
+  Lemoning.frameRateRatio = (currentTime - lastTime) / 100;
+  lastTime = currentTime;
+
+  ctx?.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  if (newHeight !== undefined || newWidth !== undefined) {
+    const targetHeight = newHeight || window.innerHeight;
+    const targetWidth = newWidth || window.innerWidth;
+    setCanvasSize(canvas, targetHeight, targetWidth);
+    Lemoning.boundaries.bottom = targetHeight;
+    Lemoning.boundaries.right = targetWidth;
+    newHeight = undefined;
+    newWidth = undefined;
+  }
+
   lemonings.forEach(lemoning => lemoning.update())
   window.requestAnimationFrame(tick);
 }
