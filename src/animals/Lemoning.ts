@@ -22,8 +22,8 @@ type movementVector = {
   y: number
 }
 
-const randomMovement = () => (Math.random() * 5) + 15;
-const randomValence = () => Math.random() - .5;
+const randomMovement = () => (Math.random() * 5) + 10;
+const randomValence = () => Math.random() - .5 >= 0 ? 1 : -1;
 
 const evaluateAgainstBoundary = (
   { deltaName,
@@ -105,6 +105,7 @@ export class Lemoning {
 
     this.position.x += this.movement.x * Lemoning.frameRateRatio;
     this.position.y += this.movement.y * Lemoning.frameRateRatio;
+
     this.draw()
   }
 }
