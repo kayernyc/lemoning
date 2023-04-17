@@ -35,7 +35,7 @@ const initField = (app: HTMLElement, canvas: HTMLCanvasElement, ctx: CanvasRende
 
 const tick = () => {
   const currentTime = Date.now();
-  Lemoning.frameRateRatio = (currentTime - lastTime) / 100;
+  Lemoning.frameRateRatio = Math.max((currentTime - lastTime) / 100, .001);
   lastTime = currentTime;
 
   ctx?.clearRect(0, 0, window.innerWidth, window.innerHeight);
